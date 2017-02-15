@@ -1,0 +1,257 @@
+<html>
+<head>
+<title>app.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,0); }
+.s1 { color: rgb(128,128,128); font-style: italic; }
+.s2 { color: rgb(0,0,128); font-weight: bold; }
+.s3 { color: rgb(0,128,128); font-weight: bold; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+app.py</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0"> 
+</span><span class="s1">#import curses</span><span class="s0"> 
+</span><span class="s1">#stdscr = curses.initscr()</span><span class="s0"> 
+</span><span class="s1">#stdscr.nodelay(1)</span><span class="s0"> 
+</span><span class="s1">#curses.noecho()</span><span class="s0"> 
+ 
+</span><span class="s2">import </span><span class="s0">math 
+</span><span class="s2">import </span><span class="s0">cv2 
+</span><span class="s2">import </span><span class="s0">numpy </span><span class="s2">as </span><span class="s0">np 
+</span><span class="s2">from </span><span class="s0">matplotlib </span><span class="s2">import </span><span class="s0">pyplot </span><span class="s2">as </span><span class="s0">plt 
+ 
+</span><span class="s2">import </span><span class="s0">paho.mqtt.client </span><span class="s2">as </span><span class="s0">mqtt 
+ 
+</span><span class="s2">def </span><span class="s0">on_connect(client, userdata, flags, rc): 
+    print(</span><span class="s3">&quot;Connected with result code &quot;</span><span class="s0">+str(rc)) 
+    client.subscribe(</span><span class="s3">&quot;#&quot;</span><span class="s0">) 
+</span><span class="s2">def </span><span class="s0">on_message(client, userdata, msg): 
+    </span><span class="s2">pass</span><span class="s0"> 
+    print(msg.topic+</span><span class="s3">&quot; &quot;</span><span class="s0">+str(msg.payload)) 
+</span><span class="s1">#client = mqtt.Client('abdf123', True, None)</span><span class="s0"> 
+client = mqtt.Client() 
+client.on_connect = on_connect 
+client.on_message = on_message 
+</span><span class="s1">#client.connect(&quot;mqtt.3dprintingsystems.com&quot;, 1883, 60)</span><span class="s0"> 
+client.connect(</span><span class="s3">&quot;139.59.233.107&quot;</span><span class="s0">, </span><span class="s4">1886</span><span class="s0">, </span><span class="s4">60</span><span class="s0">) 
+client.loop_start() 
+ 
+ 
+cap = cv2.VideoCapture(</span><span class="s4">1</span><span class="s0">) 
+cap.set(</span><span class="s4">3</span><span class="s0">,</span><span class="s4">1280</span><span class="s0">) </span><span class="s1"># Width (in pixels)</span><span class="s0"> 
+cap.set(</span><span class="s4">4</span><span class="s0">,</span><span class="s4">720</span><span class="s0">) </span><span class="s1"># Height (in pixels)</span><span class="s0"> 
+ret, frame = cap.read() 
+ 
+</span><span class="s3">&quot;&quot;&quot; 
+y0=226 
+y1=438 
+y2=y1 
+y3=y0 
+x0=259 
+x1=214 
+x2=505 
+x3=446 
+&quot;&quot;&quot;</span><span class="s0"> 
+x0=</span><span class="s4">344</span><span class="s0"> 
+x1=</span><span class="s4">214</span><span class="s0"> 
+x2=</span><span class="s4">1041</span><span class="s0"> 
+x3=</span><span class="s4">928</span><span class="s0"> 
+ 
+y0=</span><span class="s4">39</span><span class="s0"> 
+y1=</span><span class="s4">706</span><span class="s0"> 
+y2=</span><span class="s4">706</span><span class="s0"> 
+y3=</span><span class="s4">39</span><span class="s0"> 
+ 
+ 
+ 
+X=</span><span class="s4">720</span><span class="s0"> 
+Y=</span><span class="s4">720</span><span class="s0"> 
+Yr=</span><span class="s4">417</span><span class="s0">*</span><span class="s4">3</span><span class="s0">+</span><span class="s4">10 </span><span class="s1">#unit:mm</span><span class="s0"> 
+Xr=</span><span class="s4">592</span><span class="s0">*</span><span class="s4">2    </span><span class="s1">#unit:mm</span><span class="s0"> 
+scale=</span><span class="s4">1.2   </span><span class="s1">#img pixels vs. real unit_mm</span><span class="s0"> 
+flag=</span><span class="s4">0</span><span class="s0"> 
+list_img1 = [</span><span class="s3">'img/g1.jpg'</span><span class="s0">, </span><span class="s3">'img/g2.jpg'</span><span class="s0">, </span><span class="s3">'img/g3.jpg'</span><span class="s0">, </span><span class="s3">'img/g4.jpg'</span><span class="s0">,</span><span class="s3">'img/g5.jpg'</span><span class="s0">,</span><span class="s3">'img/g6.jpg'</span><span class="s0">] 
+ 
+X_camera=Xr/</span><span class="s4">2   </span><span class="s1">#unit:mm</span><span class="s0"> 
+Y_camera=Yr+</span><span class="s4">50  </span><span class="s1">#unit:mm</span><span class="s0"> 
+H_camera=</span><span class="s4">1400   </span><span class="s1">#unit:mm</span><span class="s0"> 
+H_robot=</span><span class="s4">70  </span><span class="s1">#unit:mm</span><span class="s0"> 
+areaA=int(Xr*Yr/scale/scale) 
+ 
+</span><span class="s1">#frame= 255*np.ones([X,Y,3],dtype=np.uint8)</span><span class="s0"> 
+ 
+frame=cv2.line(frame,(x0,y0),(x1,y1),(</span><span class="s4">255</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">),</span><span class="s4">4</span><span class="s0">) 
+frame=cv2.line(frame,(x1,y1),(x2,y2),(</span><span class="s4">255</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">),</span><span class="s4">4</span><span class="s0">) 
+frame=cv2.line(frame,(x2,y2),(x3,y3),(</span><span class="s4">255</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">),</span><span class="s4">4</span><span class="s0">) 
+frame=cv2.line(frame,(x3,y3),(x0,y0),(</span><span class="s4">255</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">),</span><span class="s4">4</span><span class="s0">) 
+frame = cv2.circle(frame,(</span><span class="s4">100</span><span class="s0">,</span><span class="s4">100</span><span class="s0">),</span><span class="s4">15</span><span class="s0">, (</span><span class="s4">10</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">),-</span><span class="s4">1</span><span class="s0">) 
+rows,cols,ch = frame.shape 
+ 
+pts1 = np.float32([[x0,y0],[x1,y1],[x2,y2],[x3,y3]]) 
+pts2 = np.float32([[</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">],[</span><span class="s4">0</span><span class="s0">,Y],[X,Y],[Y,</span><span class="s4">0</span><span class="s0">]]) 
+ 
+M_p = cv2.getPerspectiveTransform(pts1,pts2) 
+ 
+dst_temp = cv2.warpPerspective(frame,M_p,(X,Y)) 
+ 
+</span><span class="s1">#img2 = cv2.resize(dst_temp,None,fx=1.0, fy=Xr/Yr, interpolation = cv2.INTER_CUBIC)</span><span class="s0"> 
+img2 = cv2.resize(dst_temp,(int(Xr/scale),int(Yr/scale))) 
+</span><span class="s1">#print len(img2)</span><span class="s0"> 
+</span><span class="s1">#print len(img2[0])</span><span class="s0"> 
+plt.subplot(</span><span class="s4">121</span><span class="s0">),plt.imshow(frame),plt.title(</span><span class="s3">'Input'</span><span class="s0">) 
+plt.subplot(</span><span class="s4">122</span><span class="s0">),plt.imshow(img2),plt.title(</span><span class="s3">'Output'</span><span class="s0">) 
+plt.show() 
+ 
+MIN_MATCH_COUNT = </span><span class="s4">5</span><span class="s0"> 
+sift = cv2.xfeatures2d.SIFT_create() 
+surf = cv2.xfeatures2d.SURF_create() 
+ 
+FLANN_INDEX_KDTREE = </span><span class="s4">0</span><span class="s0"> 
+index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = </span><span class="s4">5</span><span class="s0">) 
+search_params = dict(checks = </span><span class="s4">50</span><span class="s0">) 
+flann = cv2.FlannBasedMatcher(index_params, search_params) 
+list_kp=[] 
+list_des=[] 
+ 
+</span><span class="s1">#print len(list_img1)</span><span class="s0"> 
+</span><span class="s2">for </span><span class="s0">x </span><span class="s2">in </span><span class="s0">range(</span><span class="s4">0</span><span class="s0">, len(list_img1)): 
+    print(list_img1[x]) 
+    img1 = cv2.imread(list_img1[x]) 
+    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY) 
+    kp1, des1 = sift.detectAndCompute(img1,</span><span class="s2">None</span><span class="s0">) 
+    list_kp.append(kp1) 
+    list_des.append(des1) 
+ 
+pts1 = np.float32([[x0,y0],[x1,y1],[x2,y2],[x3,y3]]) 
+pts2 = np.float32([[</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">],[</span><span class="s4">0</span><span class="s0">,Y],[X,Y],[Y,</span><span class="s4">0</span><span class="s0">]]) 
+M_p = cv2.getPerspectiveTransform(pts1,pts2) 
+</span><span class="s1">#frame= 255*np.ones([720,1280,3],dtype=np.uint8)</span><span class="s0"> 
+ret, raw = cap.read() 
+frame=raw 
+</span><span class="s2">while</span><span class="s0">(ret): 
+    </span><span class="s1">#&quot;&quot;&quot;</span><span class="s0"> 
+    </span><span class="s1">#c = stdscr.getch()</span><span class="s0"> 
+    </span><span class="s1">#if c == 113:</span><span class="s0"> 
+             
+        </span><span class="s1">#curses.nocbreak()</span><span class="s0"> 
+        </span><span class="s1">#curses.echo()</span><span class="s0"> 
+        </span><span class="s1">#curses.endwin()</span><span class="s0"> 
+        </span><span class="s1">#break</span><span class="s0"> 
+    </span><span class="s1">#&quot;&quot;&quot;</span><span class="s0"> 
+     
+    gray2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) 
+         
+    </span><span class="s2">try</span><span class="s0">: 
+         
+        dst_temp = cv2.warpPerspective(gray2,M_p,(X,Y)) 
+        img2 = cv2.resize(dst_temp,(int(Xr/scale),int(Yr/scale))) 
+         
+        kp2, des2 = sift.detectAndCompute(img2,</span><span class="s2">None</span><span class="s0">) 
+        </span><span class="s2">for </span><span class="s0">x </span><span class="s2">in </span><span class="s0">range(</span><span class="s4">0</span><span class="s0">, len(list_img1)): 
+ 
+            matches = flann.knnMatch(list_des[x],des2,k=</span><span class="s4">2</span><span class="s0">) 
+            good = [] 
+            </span><span class="s2">for </span><span class="s0">m,n </span><span class="s2">in </span><span class="s0">matches: 
+                </span><span class="s2">if </span><span class="s0">m.distance &lt; </span><span class="s4">0.6</span><span class="s0">*n.distance: 
+                    good.append(m) 
+     
+            print(</span><span class="s3">&quot;key points: &quot;</span><span class="s0">+str(len(good))) 
+     
+            </span><span class="s2">if </span><span class="s0">len(good)&gt;MIN_MATCH_COUNT: 
+                </span><span class="s1">#print &quot;Start *******&quot;</span><span class="s0"> 
+                print(</span><span class="s3">&quot;Flag=&quot;</span><span class="s0">+str(x)+</span><span class="s3">&quot; key points: &quot;</span><span class="s0">+str(len(good))) 
+                src_pts = np.float32([ list_kp[x][m.queryIdx].pt </span><span class="s2">for </span><span class="s0">m </span><span class="s2">in </span><span class="s0">good ]).reshape(-</span><span class="s4">1</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">2</span><span class="s0">) 
+                dst_pts = np.float32([ kp2[m.trainIdx].pt </span><span class="s2">for </span><span class="s0">m </span><span class="s2">in </span><span class="s0">good ]).reshape(-</span><span class="s4">1</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">2</span><span class="s0">) 
+ 
+                M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,</span><span class="s4">5.0</span><span class="s0">) 
+                matchesMask = mask.ravel().tolist() 
+ 
+                h,w = img1.shape 
+                pts = np.float32([ [</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">],[</span><span class="s4">0</span><span class="s0">,h-</span><span class="s4">1</span><span class="s0">],[w-</span><span class="s4">1</span><span class="s0">,h-</span><span class="s4">1</span><span class="s0">],[w-</span><span class="s4">1</span><span class="s0">,</span><span class="s4">0</span><span class="s0">] ]).reshape(-</span><span class="s4">1</span><span class="s0">,</span><span class="s4">1</span><span class="s0">,</span><span class="s4">2</span><span class="s0">) 
+ 
+         
+                dst = cv2.perspectiveTransform(pts,M) 
+                img2 = cv2.polylines(img2,[np.int32(dst)],</span><span class="s2">True</span><span class="s0">, (</span><span class="s4">10</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">),</span><span class="s4">1</span><span class="s0">, cv2.LINE_AA) 
+                a=[np.int32(dst)] 
+             
+             
+         
+                l1=math.sqrt(math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)+math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)) 
+                l2=math.sqrt(math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)+math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)) 
+                l3=math.sqrt(math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)+math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)) 
+                l4=math.sqrt(math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)+math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)) 
+                l0=math.sqrt(math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)+math.pow(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]-a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">],</span><span class="s4">2</span><span class="s0">)) 
+                p1=(l1+l2+l0)/</span><span class="s4">2</span><span class="s0"> 
+                p2=(l3+l4+l0)/</span><span class="s4">2</span><span class="s0"> 
+                </span><span class="s1">#area2=[(a+b+c)(a+b-c)(a+c-b)(b+c-a)]^(1/2)</span><span class="s0"> 
+                area2=math.sqrt(p1*(p1-l0)*(p1-l2)*(p1-l1))+math.sqrt(p2*(p2-l0)*(p2-l3)*(p2-l4)) 
+         
+                img2=cv2.drawKeypoints(img2,kp1,img2) 
+         
+                </span><span class="s1">#print area2</span><span class="s0"> 
+                </span><span class="s1">#print areaA</span><span class="s0"> 
+ 
+                </span><span class="s2">if </span><span class="s0">area2&lt;areaA*</span><span class="s4">1.1 </span><span class="s2">and </span><span class="s0">area2&gt;area2*</span><span class="s4">0.9</span><span class="s0">: 
+                     
+                    img2=cv2.putText(img2,str(x),(a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">],a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]), </span><span class="s4">0</span><span class="s0">, </span><span class="s4">0.7</span><span class="s0">,(</span><span class="s4">0</span><span class="s0">,</span><span class="s4">0</span><span class="s0">,</span><span class="s4">255</span><span class="s0">),</span><span class="s4">2</span><span class="s0">,cv2.LINE_AA) 
+                     
+                    X2= (a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">])/</span><span class="s4">4</span><span class="s0">*scale 
+                    Y2= (a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">])/</span><span class="s4">4</span><span class="s0">*scale 
+                    angle = </span><span class="s4">180</span><span class="s0">-math.atan2((a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">])/</span><span class="s4">2  </span><span class="s0">- (a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">])/</span><span class="s4">2</span><span class="s0">, 
+                            (a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">3</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">])/</span><span class="s4">2  </span><span class="s0">- (a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">]+a[</span><span class="s4">0</span><span class="s0">][</span><span class="s4">2</span><span class="s0">][</span><span class="s4">0</span><span class="s0">][</span><span class="s4">1</span><span class="s0">])/</span><span class="s4">2</span><span class="s0">) / math.pi * </span><span class="s4">180</span><span class="s0"> 
+                    L_prj=math.sqrt((X_camera-X2)*(X_camera-X2)+(Y_camera-Y2)*(Y_camera-Y2))*H_robot/H_camera 
+                 
+                    Y_fix=L_prj*(Y_camera-Y2)/math.sqrt((X_camera-X2)*(X_camera-X2)+(Y_camera-Y2)*(Y_camera-Y2)) 
+                    X_fix=L_prj*(X_camera-X2)/math.sqrt((X_camera-X2)*(X_camera-X2)+(Y_camera-Y2)*(Y_camera-Y2)) 
+                 
+                    X_fixed=X2+X_fix 
+                    Y_fixed=Y2+Y_fix 
+                                     
+                    </span><span class="s2">if </span><span class="s0">x==</span><span class="s4">0</span><span class="s0">: 
+                     
+                        client.publish(</span><span class="s3">&quot;camera/5C:CF:7F:24:89:37&quot;</span><span class="s0">, </span><span class="s3">&quot;{</span><span class="s2">\&quot;</span><span class="s3">X</span><span class="s2">\&quot;</span><span class="s3">:&quot; </span><span class="s0">+ str(int(X_fixed)) + </span><span class="s3">&quot;,</span><span class="s2">\&quot;</span><span class="s3">Y</span><span class="s2">\&quot;</span><span class="s3">:&quot; </span><span class="s0"> 
+                                + str(int(Y_fixed)) + </span><span class="s3">&quot;,</span><span class="s2">\&quot;</span><span class="s3">A</span><span class="s2">\&quot;</span><span class="s3">:&quot; </span><span class="s0">+ str(int(angle)) + </span><span class="s3">&quot;}&quot;</span><span class="s0">) 
+                    </span><span class="s2">if </span><span class="s0">x==</span><span class="s4">1</span><span class="s0">: 
+                     
+                        client.publish(</span><span class="s3">&quot;camera/60:01:94:06:88:F1&quot;</span><span class="s0">, </span><span class="s3">&quot;{</span><span class="s2">\&quot;</span><span class="s3">X</span><span class="s2">\&quot;</span><span class="s3">:&quot; </span><span class="s0">+ str(int(X_fixed)) + </span><span class="s3">&quot;,</span><span class="s2">\&quot;</span><span class="s3">Y</span><span class="s2">\&quot;</span><span class="s3">:&quot; </span><span class="s0"> 
+                                + str(int(Y_fixed)) + </span><span class="s3">&quot;,</span><span class="s2">\&quot;</span><span class="s3">A</span><span class="s2">\&quot;</span><span class="s3">:&quot; </span><span class="s0">+ str(int(angle)) + </span><span class="s3">&quot;}&quot;</span><span class="s0">) 
+                    </span><span class="s1">#if flag==2:</span><span class="s0"> 
+                        </span><span class="s1">#client.publish(&quot;camera/60:01:94:06:88:F1&quot;, &quot;{\&quot;X\&quot;:&quot; + str(int(X2)) + &quot;,\&quot;Y\&quot;:&quot; </span><span class="s0"> 
+                                </span><span class="s1">#+ str(int(Y2)) + &quot;,\&quot;A\&quot;:&quot; + str(int(angle)) + &quot;}&quot;)</span><span class="s0"> 
+                     
+                </span><span class="s2">else</span><span class="s0">: 
+                    print(</span><span class="s3">&quot;Shape Error!&quot;</span><span class="s0">) 
+         
+            </span><span class="s2">else</span><span class="s0">: 
+                print(</span><span class="s3">&quot;Not enough matches are found - %d/%d&quot; </span><span class="s0">% (len(good),MIN_MATCH_COUNT)) 
+                matchesMask = </span><span class="s2">None</span><span class="s0"> 
+                 
+    </span><span class="s2">except </span><span class="s0">Exception: 
+        print(</span><span class="s3">&quot;Program Error!&quot;</span><span class="s0">) 
+        </span><span class="s2">pass</span><span class="s0"> 
+ 
+ 
+    imgD = cv2.resize(img2,(int(Yr/scale/</span><span class="s4">2</span><span class="s0">),int(Xr/scale/</span><span class="s4">2</span><span class="s0">))) 
+    </span><span class="s1">#frame= 255*np.ones([720,1280,3],dtype=np.uint8)</span><span class="s0"> 
+ 
+    cv2.imshow(</span><span class="s3">&quot;PI&quot;</span><span class="s0">, imgD) 
+ 
+    </span><span class="s2">if </span><span class="s0">cv2.waitKey(</span><span class="s4">1</span><span class="s0">) &amp; </span><span class="s4">0xFF </span><span class="s0">== ord(</span><span class="s3">'q'</span><span class="s0">): 
+             
+        </span><span class="s2">break</span><span class="s0"> 
+    ret, raw = cap.read() 
+    frame = raw 
+cap.release() 
+cv2.destroyAllWindows() 
+</span></pre>
+</body>
+</html>
